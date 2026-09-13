@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-import { createNote } from '@/lib/notes';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { createNote } from '@/lib/api/clientApi';
 import { useNoteStore } from '@/lib/store/noteStore';
 import css from './NoteForm.module.css';
 
@@ -30,23 +30,29 @@ export default function NoteForm({ onClose }: NoteFormProps) {
     }
   };
 
-  const handleSubmitAction = async (formData: FormData) => {
-    const title = formData.get('title') as string;
-    const content = formData.get('content') as string;
-    const tag = formData.get('tag') as string;
-
-    try {
-      await createNote({ title, content, tag });
+  const mutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
       clearDraft();
       queryClient.invalidateQueries({ queryKey: ['notes'] });
       router.push('/notes/filter/all');
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Failed to create note:', error);
-    }
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    mutation.mutate({
+      title: draft.title,
+      content: draft.content,
+      tag: draft.tag,
+    });
   };
 
   return (
-    <form action={handleSubmitAction} className={css.form}>
+    <form onSubmit={handleSubmit} className={css.form}>
       <div className={css.formGroup}>
         <label htmlFor="title" className={css.label}>
           Title
@@ -100,8 +106,8 @@ export default function NoteForm({ onClose }: NoteFormProps) {
         <button type="button" onClick={handleCancel} className={css.cancelBtn}>
           Cancel
         </button>
-        <button type="submit" className={css.submitBtn}>
-          Create note
+        <button type="submit" className={css.submitBtn} disabled={mutation.isPending}>
+          {mutation.isPending ? 'Creating...' : 'Create note'}
         </button>
       </div>
     </form>
