@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import AuthNavigation from '@/components/AuthNavigation/AuthNavigation';
 import css from './Header.module.css';
 
 export default function Header() {
@@ -11,6 +12,7 @@ export default function Header() {
         <Link href="/notes/filter/all" className={css.link}>
           Notes
         </Link>
+        <AuthNavigation />
       </nav>
     </header>
   );

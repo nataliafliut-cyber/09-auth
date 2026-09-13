@@ -1,0 +1,36 @@
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user {
+  font-weight: 500;
+  color: #333;
+}
+
+.link {
+  text-decoration: none;
+  color: #0070f3;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.link:hover {
+  color: #0051a2;
+}
+
+.button {
+  background-color: #ff4d4f;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #d9363e;
+}
