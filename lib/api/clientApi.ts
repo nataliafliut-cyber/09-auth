@@ -12,17 +12,17 @@ export interface CredentialsDto {
   password: string;
 }
 
-export const clientLogin = async (data: CredentialsDto): Promise<User> => {
+export const login = async (data: CredentialsDto): Promise<User> => {
   const response = await api.post<User>('/auth/login', data);
   return response.data;
 };
 
-export const clientRegister = async (data: CredentialsDto): Promise<User> => {
+export const register = async (data: CredentialsDto): Promise<User> => {
   const response = await api.post<User>('/auth/register', data);
   return response.data;
 };
 
-export const clientLogout = async (): Promise<void> => {
+export const logout = async (): Promise<void> => {
   await api.post('/auth/logout');
 };
 
@@ -33,6 +33,16 @@ export const getSession = async (): Promise<User | null> => {
   } catch {
     return null;
   }
+};
+
+export const getCurrentUser = async (): Promise<User> => {
+  const { data } = await api.get<User>('/users/me');
+  return data;
+};
+
+export const updateUserProfile = async (data: { username: string }): Promise<User> => {
+  const response = await api.patch<User>('/users/me', data);
+  return response.data;
 };
 
 export const fetchNotes = async (page: number = 1, search: string = '', tag?: string): Promise<FetchNotesResponse> => {

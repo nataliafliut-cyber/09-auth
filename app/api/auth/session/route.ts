@@ -1,23 +1,40 @@
-import { NextResponse } from 'next/server';
-import axios from 'axios';
+import { NextResponse, NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
+import { api } from '@/lib/api/api';
+import { isAxiosError } from 'axios';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
+    const cookieString = cookieStore.toString();
 
-    if (!cookieHeader) {
-      return NextResponse.json(null, { status: 401 });
+    const response = await api.get('/auth/session', {
+      headers: {
+        Cookie: cookieString,
+      },
+    });
+
+    const nextResponse = NextResponse.json(response.data, { status: response.status });
+
+    const setCookieHeader = response.headers['set-cookie'];
+    if (setCookieHeader) {
+      if (Array.isArray(setCookieHeader)) {
+        setCookieHeader.forEach(cookie => {
+          nextResponse.headers.append('set-cookie', cookie);
+        });
+      } else {
+        nextResponse.headers.set('set-cookie', setCookieHeader);
+      }
     }
 
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
-      { headers: { Cookie: cookieHeader } }
-    );
-
-    return NextResponse.json(response.data);
-  } catch (error) {
-    return NextResponse.json(null, { status: 401 });
+    return nextResponse;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      return NextResponse.json(
+        { message: error.response?.data?.message || 'Unauthorized' },
+        { status: error.response?.status || 401 }
+      );
+    }
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

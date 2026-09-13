@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { clientRegister } from '@/lib/api/clientApi';
+import { register } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
 
 export default function SignUpPage() {
@@ -15,7 +15,7 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const user = await clientRegister({ email, password });
+      const user = await register({ email, password });
       setUser(user);
       router.push('/profile');
       router.refresh();

@@ -1,9 +1,11 @@
 import { fetchServerSession } from '@/lib/api/serverApi';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Metadata } from 'next';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'User Profile',
+  description: 'View and manage your user profile details.',
 };
 
 export default async function ProfilePage() {

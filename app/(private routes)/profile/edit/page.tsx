@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
-import { api } from '@/lib/api/api';
+import { updateUserProfile } from '@/lib/api/clientApi';
 
 export default function EditProfilePage() {
   const router = useRouter();
@@ -15,8 +15,8 @@ export default function EditProfilePage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await api.patch('/users/me', { username });
-      setUser(data);
+      const updatedUser = await updateUserProfile({ username });
+      setUser(updatedUser);
       router.push('/profile');
     } catch (error) {
       console.error('Failed to update profile', error);

@@ -1,43 +1,49 @@
-import { NextResponse } from 'next/server';
-import axios from 'axios';
+import { NextResponse, NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
+import { api } from '@/lib/api/api';
+import { isAxiosError } from 'axios';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
 
-    const response = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
-      { headers: { Cookie: cookieHeader } }
-    );
+    const response = await api.get('/users/me', {
+      headers: {
+        Cookie: cookieStore.toString(),
+      },
+    });
 
-    return NextResponse.json(response.data);
-  } catch (error: any) {
-    return NextResponse.json(
-      { message: error.response?.data?.message || 'Nieautoryzowano' },
-      { status: error.response?.status || 401 }
-    );
+    return NextResponse.json(response.data, { status: response.status });
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      return NextResponse.json(
+        { message: error.response?.data?.message || 'Failed to fetch user' },
+        { status: error.response?.status || 500 }
+      );
+    }
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   try {
-    const body = await request.json();
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
+    const body = await request.json();
 
-    const response = await axios.patch(
-      `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
-      body,
-      { headers: { Cookie: cookieHeader } }
-    );
+    const response = await api.patch('/users/me', body, {
+      headers: {
+        Cookie: cookieStore.toString(),
+      },
+    });
 
-    return NextResponse.json(response.data);
-  } catch (error: any) {
-    return NextResponse.json(
-      { message: error.response?.data?.message || 'Błąd aktualizacji profilu' },
-      { status: error.response?.status || 500 }
-    );
+    return NextResponse.json(response.data, { status: response.status });
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      return NextResponse.json(
+        { message: error.response?.data?.message || 'Failed to update user' },
+        { status: error.response?.status || 500 }
+      );
+    }
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

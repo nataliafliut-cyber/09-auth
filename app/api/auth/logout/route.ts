@@ -1,33 +1,40 @@
-import { NextResponse } from 'next/server';
-import axios from 'axios';
+import { NextResponse, NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
+import { api } from '@/lib/api/api';
+import { isAxiosError } from 'axios';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const cookieHeader = cookieStore.toString();
+    const cookieString = cookieStore.toString();
 
-    await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/logout`,
-      {},
-      { headers: { Cookie: cookieHeader } }
-    );
-
-    const res = NextResponse.json({ message: 'Logged out successfully' });
-    
-    // Czyszczenie ciasteczek sesyjnych po stronie klienta
-    const allCookies = cookieStore.getAll();
-    allCookies.forEach((c) => {
-      res.cookies.set(c.name, '', { expires: new Date(0), path: '/' });
+    const response = await api.post('/auth/logout', {}, {
+      headers: {
+        Cookie: cookieString,
+      },
     });
 
-    return res;
-  } catch (error: any) {
-    const res = NextResponse.json({ message: 'Logout completed' });
-    const cookieStore = await cookies();
-    cookieStore.getAll().forEach((c) => {
-      res.cookies.set(c.name, '', { expires: new Date(0), path: '/' });
-    });
-    return res;
+    const nextResponse = NextResponse.json(response.data, { status: response.status });
+
+    const setCookieHeader = response.headers['set-cookie'];
+    if (setCookieHeader) {
+      if (Array.isArray(setCookieHeader)) {
+        setCookieHeader.forEach(cookie => {
+          nextResponse.headers.append('set-cookie', cookie);
+        });
+      } else {
+        nextResponse.headers.set('set-cookie', setCookieHeader);
+      }
+    }
+
+    return nextResponse;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      return NextResponse.json(
+        { message: error.response?.data?.message || 'Logout failed' },
+        { status: error.response?.status || 500 }
+      );
+    }
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

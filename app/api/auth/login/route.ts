@@ -1,43 +1,33 @@
-import { NextResponse } from 'next/server';
-import axios from 'axios';
+import { NextResponse, NextRequest } from 'next/server';
+import { api } from '@/lib/api/api';
+import { isAxiosError } from 'axios';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
-      body
-    );
-
-    const res = NextResponse.json(response.data);
+    const response = await api.post('/auth/login', body);
+    
+    const nextResponse = NextResponse.json(response.data, { status: response.status });
+    
     const setCookieHeader = response.headers['set-cookie'];
-
     if (setCookieHeader) {
-      const cookiesArray = Array.isArray(setCookieHeader)
-        ? setCookieHeader
-        : [setCookieHeader];
-
-      cookiesArray.forEach((cookieStr) => {
-        const [nameValue] = cookieStr.split(';');
-        const [name, ...valueParts] = nameValue.split('=');
-        const value = valueParts.join('=');
-
-        if (name && value) {
-          res.cookies.set(name.trim(), value.trim(), {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            path: '/',
-          });
-        }
-      });
+      if (Array.isArray(setCookieHeader)) {
+        setCookieHeader.forEach(cookie => {
+          nextResponse.headers.append('set-cookie', cookie);
+        });
+      } else {
+        nextResponse.headers.set('set-cookie', setCookieHeader);
+      }
     }
-
-    return res;
-  } catch (error: any) {
-    return NextResponse.json(
-      { message: error.response?.data?.message || 'Błąd logowania' },
-      { status: error.response?.status || 500 }
-    );
+    
+    return nextResponse;
+  } catch (error: unknown) {
+    if (isAxiosError(error)) {
+      return NextResponse.json(
+        { message: error.response?.data?.message || 'Login failed' },
+        { status: error.response?.status || 500 }
+      );
+    }
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }
