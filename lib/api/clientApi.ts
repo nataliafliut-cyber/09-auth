@@ -7,12 +7,17 @@ export interface FetchNotesResponse {
   totalPages: number;
 }
 
-export const clientLogin = async (data: Record<string, any>): Promise<User> => {
+export interface CredentialsDto {
+  email: string;
+  password: string;
+}
+
+export const clientLogin = async (data: CredentialsDto): Promise<User> => {
   const response = await api.post<User>('/auth/login', data);
   return response.data;
 };
 
-export const clientRegister = async (data: Record<string, any>): Promise<User> => {
+export const clientRegister = async (data: CredentialsDto): Promise<User> => {
   const response = await api.post<User>('/auth/register', data);
   return response.data;
 };

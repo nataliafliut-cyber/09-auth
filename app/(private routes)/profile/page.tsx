@@ -1,28 +1,40 @@
-'use client';
-
+import { fetchServerSession } from '@/lib/api/serverApi';
+import Image from 'next/image';
 import Link from 'next/link';
-import { useAuthStore } from '@/lib/store/authStore';
-import css from './page.module.css';
 
-export default function ProfilePage() {
-  const { user } = useAuthStore();
+export const metadata = {
+  title: 'User Profile',
+};
+
+export default async function ProfilePage() {
+  let user = null;
+  try {
+    const response = await fetchServerSession();
+    user = response.data;
+  } catch (error) {
+    // obsługa błędu sesji
+  }
 
   return (
-    <div className={css.container}>
-      <h1 className={css.title}>Profil użytkownika</h1>
-      <div className={css.infoGroup}>
-        <div className={css.infoRow}>
-          <span className={css.label}>Nazwa użytkownika:</span>
-          <span className={css.value}>{user?.username || 'Brak danych'}</span>
+    <div>
+      <h1>Profile</h1>
+      {user ? (
+        <div>
+          {user.avatar && (
+            <Image
+              src={user.avatar}
+              alt="User Avatar"
+              width={100}
+              height={100}
+            />
+          )}
+          <p>Username: {user.username || user.email}</p>
+          <p>Email: {user.email}</p>
+          <Link href="/profile/edit">Edit Profile</Link>
         </div>
-        <div className={css.infoRow}>
-          <span className={css.label}>Email:</span>
-          <span className={css.value}>{user?.email || 'Brak danych'}</span>
-        </div>
-      </div>
-      <Link href="/profile/edit" className={css.editButton}>
-        Edytuj profil
-      </Link>
+      ) : (
+        <p>Please sign in.</p>
+      )}
     </div>
   );
 }

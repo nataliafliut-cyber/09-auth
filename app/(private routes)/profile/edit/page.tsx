@@ -1,45 +1,54 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/authStore';
-import css from './page.module.css';
+import { api } from '@/lib/api/api';
 
 export default function EditProfilePage() {
   const router = useRouter();
   const { user, setUser } = useAuthStore();
   const [username, setUsername] = useState(user?.username || '');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (user) {
-      setUser({ ...user, username });
+    setLoading(true);
+    try {
+      const { data } = await api.patch('/users/me', { username });
+      setUser(data);
       router.push('/profile');
+    } catch (error) {
+      console.error('Failed to update profile', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className={css.container}>
-      <h1 className={css.title}>Edytuj profil</h1>
-      <form onSubmit={handleSubmit} className={css.form}>
-        <label className={css.label}>
-          Nazwa użytkownika:
+    <div>
+      <h1>Edit Profile</h1>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Email (read-only)</label>
+          <input type="email" value={user?.email || ''} readOnly disabled />
+        </div>
+        <div>
+          <label>Username</label>
           <input
             type="text"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
             required
-            className={css.input}
           />
-        </label>
-        <div className={css.buttonGroup}>
-          <button type="submit" className={css.saveButton}>
-            Zapisz zmiany
+        </div>
+        <div>
+          <button type="button" onClick={() => router.back()}>
+            Cancel
           </button>
-          <Link href="/profile" className={css.cancelButton}>
-            Anuluj
-          </Link>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Saving...' : 'Save'}
+          </button>
         </div>
       </form>
     </div>
