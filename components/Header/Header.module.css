@@ -1,0 +1,36 @@
+.header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: 1.5rem; /* Zapewnia odstęp między Home a Notes */
+}
+
+.nav a {
+  color: #4a5568;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav a:hover {
+  color: #0d6efd;
+}
