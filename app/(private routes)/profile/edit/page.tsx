@@ -2,12 +2,16 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useAuthStore } from '@/lib/store/authStore';
 import { updateUserProfile } from '@/lib/api/clientApi';
+import { User } from '@/types/user';
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const { user, setUser } = useAuthStore();
+  const user = useAuthStore((state) => state.user) as User | null;
+  const setUser = useAuthStore((state) => state.setUser);
+  
   const [username, setUsername] = useState(user?.username || '');
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +33,16 @@ export default function EditProfilePage() {
     <div>
       <h1>Edit Profile</h1>
       <form onSubmit={handleSubmit}>
+        {user?.avatar && (
+          <div>
+            <Image
+              src={user.avatar}
+              alt="User Avatar"
+              width={100}
+              height={100}
+            />
+          </div>
+        )}
         <div>
           <label>Email (read-only)</label>
           <input type="email" value={user?.email || ''} readOnly disabled />

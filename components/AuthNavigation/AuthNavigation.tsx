@@ -25,7 +25,9 @@ export default function AuthNavigation() {
     <nav className={styles.nav}>
       {isAuthenticated ? (
         <div className={styles.userSection}>
-          <span>{user?.username}</span>
+          <Link href="/profile" className={styles.profileLink}>
+            {user?.username || user?.email}
+          </Link>
           <button onClick={handleLogout} className={styles.button}>
             Logout
           </button>

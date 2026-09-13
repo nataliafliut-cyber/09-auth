@@ -1,33 +1,35 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { api } from '@/lib/api/api';
 import { isAxiosError } from 'axios';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
     const response = await api.post('/auth/login', body);
     
-    const nextResponse = NextResponse.json(response.data, { status: response.status });
-    
+    const cookieStore = await cookies();
     const setCookieHeader = response.headers['set-cookie'];
-    if (setCookieHeader) {
-      if (Array.isArray(setCookieHeader)) {
-        setCookieHeader.forEach(cookie => {
-          nextResponse.headers.append('set-cookie', cookie);
-        });
-      } else {
-        nextResponse.headers.set('set-cookie', setCookieHeader);
-      }
-    }
     
-    return nextResponse;
+    if (setCookieHeader) {
+      const cookiesArray = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
+      cookiesArray.forEach((cookieStr) => {
+        const [cookiePair] = cookieStr.split(';');
+        const [name, value] = cookiePair.split('=');
+        if (name && value) {
+          cookieStore.set(name.trim(), value.trim());
+        }
+      });
+    }
+
+    return NextResponse.json(response.data, { status: response.status });
   } catch (error: unknown) {
     if (isAxiosError(error)) {
       return NextResponse.json(
-        { message: error.response?.data?.message || 'Login failed' },
+        error.response?.data || { error: 'Login failed' },
         { status: error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

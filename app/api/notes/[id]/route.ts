@@ -1,10 +1,10 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { api } from '@/lib/api/api';
 import { isAxiosError } from 'axios';
 
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -21,16 +21,16 @@ export async function GET(
   } catch (error: unknown) {
     if (isAxiosError(error)) {
       return NextResponse.json(
-        { message: error.response?.data?.message || 'Failed to fetch note' },
+        error.response?.data || { error: 'Failed to fetch note' },
         { status: error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
 export async function PATCH(
-  request: NextRequest,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -48,16 +48,16 @@ export async function PATCH(
   } catch (error: unknown) {
     if (isAxiosError(error)) {
       return NextResponse.json(
-        { message: error.response?.data?.message || 'Failed to update note' },
+        error.response?.data || { error: 'Failed to update note' },
         { status: error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
 export async function DELETE(
-  request: NextRequest,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -74,10 +74,10 @@ export async function DELETE(
   } catch (error: unknown) {
     if (isAxiosError(error)) {
       return NextResponse.json(
-        { message: error.response?.data?.message || 'Failed to delete note' },
+        error.response?.data || { error: 'Failed to delete note' },
         { status: error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

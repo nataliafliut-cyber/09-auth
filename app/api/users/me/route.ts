@@ -1,12 +1,11 @@
-import { NextResponse, NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { api } from '@/lib/api/api';
 import { isAxiosError } from 'axios';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const cookieStore = await cookies();
-
     const response = await api.get('/users/me', {
       headers: {
         Cookie: cookieStore.toString(),
@@ -17,15 +16,15 @@ export async function GET(request: NextRequest) {
   } catch (error: unknown) {
     if (isAxiosError(error)) {
       return NextResponse.json(
-        { message: error.response?.data?.message || 'Failed to fetch user' },
+        error.response?.data || { error: 'Failed to fetch user' },
         { status: error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: Request) {
   try {
     const cookieStore = await cookies();
     const body = await request.json();
@@ -40,10 +39,10 @@ export async function PATCH(request: NextRequest) {
   } catch (error: unknown) {
     if (isAxiosError(error)) {
       return NextResponse.json(
-        { message: error.response?.data?.message || 'Failed to update user' },
+        error.response?.data || { error: 'Failed to update user' },
         { status: error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
