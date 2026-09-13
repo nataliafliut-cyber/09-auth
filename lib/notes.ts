@@ -1,17 +1,10 @@
-import axios from 'axios';
+import { api } from '@/app/api/api'; // lub względna ścieżka zależnie od folderu
 import { Note, CreateNoteDto } from '@/types/note';
 
 export interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
 }
-
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
-  headers: {
-    Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
-  },
-});
 
 export const fetchNotes = async (
   page: number = 1,
