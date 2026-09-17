@@ -1,7 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { api } from '@/lib/api/api';
 import { isAxiosError } from 'axios';
+import { logErrorResponse } from '@/app/utils/logErrorResponse';
 
 export async function GET(
   request: Request,
@@ -19,6 +22,7 @@ export async function GET(
 
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: unknown) {
+    logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
         error.response?.data || { error: 'Failed to fetch note' },
@@ -46,6 +50,7 @@ export async function PATCH(
 
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: unknown) {
+    logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
         error.response?.data || { error: 'Failed to update note' },
@@ -72,6 +77,7 @@ export async function DELETE(
 
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: unknown) {
+    logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
         error.response?.data || { error: 'Failed to delete note' },

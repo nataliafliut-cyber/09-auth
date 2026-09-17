@@ -1,7 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { api } from '@/lib/api/api';
 import { isAxiosError } from 'axios';
+import { logErrorResponse } from '@/app/utils/logErrorResponse';
 
 export async function GET(request: Request) {
   try {
@@ -11,13 +14,13 @@ export async function GET(request: Request) {
     const page = searchParams.get('page') || '1';
     const search = searchParams.get('search') || '';
     const tag = searchParams.get('tag') || '';
-    
-    const params = new URLSearchParams();
-    params.append('page', page);
-    if (search) params.append('search', search);
-    if (tag && tag !== 'all') params.append('tag', tag);
 
-    const response = await api.get(`/notes?${params.toString()}`, {
+    const queryParams: Record<string, string> = { page };
+    if (search) queryParams.search = search;
+    if (tag && tag.toLowerCase() !== 'all') queryParams.tag = tag;
+
+    const response = await api.get('/notes', {
+      params: queryParams,
       headers: {
         Cookie: cookieStore.toString(),
       },
@@ -25,6 +28,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: unknown) {
+    logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
         error.response?.data || { error: 'Failed to fetch notes' },
@@ -49,6 +53,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: unknown) {
+    logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
         error.response?.data || { error: 'Failed to create note' },

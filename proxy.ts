@@ -14,21 +14,20 @@ export async function proxy(request: NextRequest) {
   const refreshToken = cookieStore.get('refreshToken')?.value;
 
   let isAuthenticated = !!accessToken;
+  let responseWithCookies: NextResponse | null = null;
 
   if (!accessToken && refreshToken) {
     try {
       const res = await fetchServerSession();
       if (res && res.status === 200) {
         isAuthenticated = true;
-        // Przekazanie nowych ciasteczek z odpowiedzi serwera jeśli istnieją
         const setCookieHeader = res.headers?.['set-cookie'];
         if (setCookieHeader) {
-          const resNext = NextResponse.next();
+          responseWithCookies = NextResponse.next();
           const cookiesArray = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
           cookiesArray.forEach((cookieStr) => {
-            resNext.headers.append('set-cookie', cookieStr);
+            responseWithCookies!.headers.append('set-cookie', cookieStr);
           });
-          return resNext;
         }
       }
     } catch {
@@ -47,7 +46,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next();
+  return responseWithCookies || NextResponse.next();
 }
 
 export const config = {

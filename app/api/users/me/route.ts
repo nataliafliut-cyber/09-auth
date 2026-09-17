@@ -1,7 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { api } from '@/lib/api/api';
 import { isAxiosError } from 'axios';
+import { logErrorResponse } from '@/app/utils/logErrorResponse';
 
 export async function GET() {
   try {
@@ -14,6 +17,7 @@ export async function GET() {
 
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: unknown) {
+    logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
         error.response?.data || { error: 'Failed to fetch user' },
@@ -37,6 +41,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: unknown) {
+    logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
         error.response?.data || { error: 'Failed to update user' },

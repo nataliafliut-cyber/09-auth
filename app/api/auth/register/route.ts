@@ -1,7 +1,11 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { api } from '@/lib/api/api';
 import { isAxiosError } from 'axios';
+import { parseSetCookie } from '@/app/utils/parseSetCookie';
+import { logErrorResponse } from '@/app/utils/logErrorResponse';
 
 export async function POST(request: Request) {
   try {
@@ -14,16 +18,16 @@ export async function POST(request: Request) {
     if (setCookieHeader) {
       const cookiesArray = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
       cookiesArray.forEach((cookieStr) => {
-        const [cookiePair] = cookieStr.split(';');
-        const [name, value] = cookiePair.split('=');
-        if (name && value) {
-          cookieStore.set(name.trim(), value.trim());
+        const parsed = parseSetCookie(cookieStr);
+        if (parsed) {
+          cookieStore.set(parsed.name, parsed.value, parsed.options);
         }
       });
     }
 
     return NextResponse.json(response.data, { status: response.status });
   } catch (error: unknown) {
+    logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
         error.response?.data || { error: 'Registration failed' },
