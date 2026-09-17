@@ -1,41 +1,48 @@
-export const dynamic = 'force-dynamic';
-
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { api } from '@/lib/api/api';
+import { api } from '../../api';
+import { parseSetCookie } from 'cookie';
 import { isAxiosError } from 'axios';
-import { parseSetCookie } from '@/app/utils/parseSetCookie';
-import { logErrorResponse } from '@/app/utils/logErrorResponse';
+import { logErrorResponse } from '../../_utils/utils';
 
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const response = await api.get('/auth/session', {
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    });
+    const accessToken = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
 
-    const setCookieHeader = response.headers['set-cookie'];
-    if (setCookieHeader) {
-      const cookiesArray = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
-      cookiesArray.forEach((cookieStr) => {
-        const parsed = parseSetCookie(cookieStr);
-        if (parsed) {
-          cookieStore.set(parsed.name, parsed.value, parsed.options);
-        }
+    if (accessToken) {
+      return NextResponse.json({ success: true });
+    }
+
+    if (refreshToken) {
+      const apiRes = await api.get('auth/session', {
+        headers: {
+          Cookie: cookieStore.toString(),
+        },
       });
-    }
 
-    return NextResponse.json(response.data, { status: response.status });
-  } catch (error: any) {
-    logErrorResponse(error);
-    if (isAxiosError(error)) {
-      return NextResponse.json(
-        { error: error.message, response: error.response?.data },
-        { status: error.status || error.response?.status || 401 }
-      );
+      const setCookie = apiRes.headers['set-cookie'];
+
+      if (setCookie) {
+        const cookieArray = Array.isArray(setCookie) ? setCookie : [setCookie];
+        for (const cookieStr of cookieArray) {
+          const parsed = parseSetCookie(cookieStr);
+
+          if (parsed.value) {
+            cookieStore.set(parsed.name, parsed.value, parsed);
+          }
+        }
+        return NextResponse.json({ success: true }, { status: 200 });
+      }
     }
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false }, { status: 200 });
+  } catch (error) {
+    if (isAxiosError(error)) {
+      logErrorResponse(error.response?.data);
+      return NextResponse.json({ success: false }, { status: 200 });
+    }
+    logErrorResponse({ message: (error as Error).message });
+    return NextResponse.json({ success: false }, { status: 200 });
   }
 }
