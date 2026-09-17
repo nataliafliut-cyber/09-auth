@@ -10,13 +10,6 @@ import { logErrorResponse } from '@/app/utils/logErrorResponse';
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken')?.value;
-    const refreshToken = cookieStore.get('refreshToken')?.value;
-
-    if (!accessToken && !refreshToken) {
-      return NextResponse.json({ success: false }, { status: 401 });
-    }
-
     const response = await api.get('/auth/session', {
       headers: {
         Cookie: cookieStore.toString(),
@@ -34,15 +27,15 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ success: true, user: response.data }, { status: response.status });
-  } catch (error: unknown) {
+    return NextResponse.json(response.data, { status: response.status });
+  } catch (error: any) {
     logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
-        { success: false, error: error.response?.data?.error || 'Unauthorized' },
-        { status: error.response?.status || 401 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status || error.response?.status || 401 }
       );
     }
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { cookies } from 'next/headers';
 import { fetchServerSession } from '@/lib/api/serverApi';
+import { parseSetCookie } from '@/app/utils/parseSetCookie';
 
 const privateRoutes = ['/profile', '/notes'];
 const authRoutes = ['/sign-in', '/sign-up'];
@@ -14,7 +15,6 @@ export async function proxy(request: NextRequest) {
   const refreshToken = cookieStore.get('refreshToken')?.value;
 
   let isAuthenticated = !!accessToken;
-  let responseWithCookies: NextResponse | null = null;
 
   if (!accessToken && refreshToken) {
     try {
@@ -23,10 +23,12 @@ export async function proxy(request: NextRequest) {
         isAuthenticated = true;
         const setCookieHeader = res.headers?.['set-cookie'];
         if (setCookieHeader) {
-          responseWithCookies = NextResponse.next();
           const cookiesArray = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
           cookiesArray.forEach((cookieStr) => {
-            responseWithCookies!.headers.append('set-cookie', cookieStr);
+            const parsed = parseSetCookie(cookieStr);
+            if (parsed) {
+              cookieStore.set(parsed.name, parsed.value, parsed.options);
+            }
           });
         }
       }
@@ -46,7 +48,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return responseWithCookies || NextResponse.next();
+  return NextResponse.next();
 }
 
 export const config = {

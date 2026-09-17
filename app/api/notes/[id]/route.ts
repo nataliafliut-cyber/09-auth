@@ -21,15 +21,15 @@ export async function GET(
     });
 
     return NextResponse.json(response.data, { status: response.status });
-  } catch (error: unknown) {
+  } catch (error: any) {
     logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
-        error.response?.data || { error: 'Failed to fetch note' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status || error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -49,15 +49,15 @@ export async function PATCH(
     });
 
     return NextResponse.json(response.data, { status: response.status });
-  } catch (error: unknown) {
+  } catch (error: any) {
     logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
-        error.response?.data || { error: 'Failed to update note' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status || error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -76,14 +76,14 @@ export async function DELETE(
     });
 
     return NextResponse.json(response.data, { status: response.status });
-  } catch (error: unknown) {
+  } catch (error: any) {
     logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
-        error.response?.data || { error: 'Failed to delete note' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status || error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

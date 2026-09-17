@@ -27,15 +27,15 @@ export async function GET(request: Request) {
     });
 
     return NextResponse.json(response.data, { status: response.status });
-  } catch (error: unknown) {
+  } catch (error: any) {
     logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
-        error.response?.data || { error: 'Failed to fetch notes' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status || error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -52,14 +52,14 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(response.data, { status: response.status });
-  } catch (error: unknown) {
+  } catch (error: any) {
     logErrorResponse(error);
     if (isAxiosError(error)) {
       return NextResponse.json(
-        error.response?.data || { error: 'Failed to create note' },
-        { status: error.response?.status || 500 }
+        { error: error.message, response: error.response?.data },
+        { status: error.status || error.response?.status || 500 }
       );
     }
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
