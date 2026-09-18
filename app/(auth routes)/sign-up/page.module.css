@@ -1,93 +1,73 @@
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 400px;
-  margin: 40px auto;
-  padding: 24px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #ffffff;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: #333333;
-}
-
-.error {
-  color: #d32f2f;
-  background-color: #fde8e8;
-  padding: 8px 12px;
-  border-radius: 4px;
-  margin-bottom: 16px;
-  width: 100%;
-  text-align: center;
-  font-size: 14px;
+.mainContent {
+  flex: 1;
 }
 
 .form {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 100%;
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 24px;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.label {
+.formTitle {
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  color: #212529;
+}
+
+.formGroup {
   display: flex;
   flex-direction: column;
-  gap: 6px;
   font-size: 14px;
   font-weight: 500;
-  color: #555555;
+  color: #212529;
 }
 
 .input {
-  padding: 10px 12px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  margin-top: 4px;
+  padding: 8px 12px;
   font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s ease;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
 }
 
-.input:focus {
-  border-color: #0070f3;
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
-.button {
-  padding: 10px 16px;
-  background-color: #0070f3;
-  color: #ffffff;
+.submitButton {
+  padding: 8px 16px;
+  font-size: 16px;
+  background-color: #0d6efd;
+  color: #fff;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
-  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  margin-top: 8px;
 }
 
-.button:hover:not(:disabled) {
-  background-color: #0051a2;
+.submitButton:hover {
+  background-color: #0d6efd;
 }
 
-.button:disabled {
-  background-color: #a0c7ff;
+.submitButton:disabled {
+  background-color: #b1c7ae;
   cursor: not-allowed;
 }
 
-.text {
-  margin-top: 16px;
-  font-size: 14px;
-  color: #666666;
-}
-
-.text a {
-  color: #0070f3;
-  text-decoration: underline;
+.error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+  text-align: center;
 }
